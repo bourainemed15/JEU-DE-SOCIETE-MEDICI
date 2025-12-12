@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ra - The Board Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-sand: #F4E8D1;
+            --nile-blue: #1A3A5A;
+            --gold-accent: #FFD700;
+            --terracotta-red: #B85B4D;
+            --dark-text: #333333;
+            --light-text: #f0f0f0;
+            --ui-border: #a48a60;
+            --player-human-bg: rgba(26, 58, 90, 0.1);
+            --player-ai-bg: rgba(184, 91, 77, 0.1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-sand);
+            color: var(--dark-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image:
+                linear-gradient(rgba(244, 232, 209, 0.8), rgba(244, 232, 209, 0.8)),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill-rule="evenodd"><g fill="%23c2ad8f" fill-opacity="0.2"><path opacity=".5" d="M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z"/></g></g></svg>');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        #game-container {
+            display: grid;
+            grid-template-areas:
+                "title title title"
+                "p2-area main-board p3-area"
+                "p1-area p1-area p1-area";
+            grid-template-columns: 2fr 5fr 2fr;
+            grid-template-rows: auto 1fr auto;
+            width: 100vw;
+            height: 100vh;
+            max-width: 1600px;
+            max-height: 900px;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .game-title {
+            grid-area: title;
+            font-family: 'Cinzel Decorative', cursive;
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--nile-blue);
+            text-shadow: 1px 1px 2px var(--gold-accent);
+        }
+
+        .main-board {
+            grid-area: main-board;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            border: 2px solid var(--ui-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .player-area {
+            display: flex;
+            flex-direction: column;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            border: 2px solid var(--ui-border);
+            overflow: hidden;
+        }
+        
+        .player-area-p1 { grid-area: p1-area; background: var(--player-human-bg); }
+        .player-area-p2 { grid-area: p2-area; background: var(--player-ai-bg); }
+        .player-area-p3 { grid-area: p3-area; background: var(--player-ai-bg); }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--ui-border);
+        }
+        .player-header h3 { font-size: 1.2rem; font-weight: 600; color: var(--nile-blue); }
+        .player-header .score { font-size: 1.2rem; font-weight: bold; color: var(--gold-accent); background: var(--nile-blue); padding: 2px 8px; border-radius: 5px; }
+
+        .player-suns { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+        .sun-token {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--gold-accent);
+            color: var(--nile-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border: 2px solid var(--nile-blue);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .sun-token.bid-option { cursor: pointer; }
+        .sun-token.bid-option:hover { transform: scale(1.1); }
+
+        .player-tiles {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+            gap: 0.5rem;
+            overflow-y: auto;
+        }
+
+        .tile {
+            width: 35px; height: 35px;
+            border-radius: 5px;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #e6d8b9;
+            border: 1px solid var(--ui-border);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+        }
+
+        /* Board specifics */
+        .board-top, .board-bottom { display: flex; gap: 1rem; }
+        .board-top { flex-grow: 1; }
+        .ra-track {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .ra-track-label, .sun-disc-label {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 700;
+            color: var(--nile-blue);
+        }
+        .ra-slots, .auction-slots {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+        .ra-slot, .auction-slot {
+            width: 45px; height: 45px;
+            border: 2px dashed var(--ui-border);
+            border-radius: 5px;
+        }
+        .ra-slot .tile, .auction-slot .tile { width: 100%; height: 100%; font-size: 2rem; }
+
+        .draw-pile-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .draw-pile {
+            width: 70px; height: 100px;
+            background: var(--terracotta-red);
+            border: 3px solid var(--nile-blue);
+            border-radius: 10px;
+            color: var(--gold-accent);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 3px 3px 0px var(--nile-blue);
+            transition: all 0.2s ease;
+        }
+        .draw-pile:hover { transform: translateY(-3px); box-shadow: 5px 5px 0px var(--nile-blue); }
+        .draw-pile.disabled { cursor: not-allowed; opacity: 0.6; }
+        .draw-pile-count { font-size: 0.9rem; color: var(--nile-blue); font-weight: bold; }
+
+        .sun-disc {
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--gold-accent) 60%, var(--nile-blue) 65%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--nile-blue);
+            border: 4px solid var(--nile-blue);
+            box-shadow: 0 0 15px var(--gold-accent);
+        }
+
+        .auction-track {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .auction-track-label {
+            font-family: 'Cinzel Decorative', cursive;
+            font-weight: 700;
+            color: var(--nile-blue);
+        }
+
+        .controls-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+        .action-button {
+            padding: 1rem 2rem;
+            font-family: 'Cinzel Decorative', cursive;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--light-text);
+            background-color: var(--terracotta-red);
+            border: 2px solid var(--nile-blue);
+            border-radius: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 3px 3px 0px var(--nile-blue);
+            transition: all 0.2s ease;
+        }
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 5px 5px 0px var(--nile-blue);
+        }
+        .action-button:disabled {
+            background-color: #a0a0a0;
+            cursor: not-allowed;
+            box-shadow: 1px 1px 0px #555;
+            transform: translateY(2px);
+        }
+
+        .message-area {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            min-height: 25px;
+            color: var(--nile-blue);
+        }
+        
+        .current-player {
+            border: 4px solid var(--gold-accent) !important;
+            box-shadow: 0 0 20px var(--gold-accent);
+        }
+
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: var(--bg-sand);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 3px solid var(--nile-blue);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.4);
+            transform: scale(0.8);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h2 {
+            font-family: 'Cinzel Decorative', cursive;
+            color: var(--nile-blue);
+            margin-bottom: 1rem;
+        }
+        #bid-options { margin-top: 1rem; display: flex; justify-content: center; gap: 0.5rem; }
+
+        @media (max-width: 1024px) {
+            #game-container {
+                grid-template-areas:
+                    "title title"
+                    "main-board main-board"
+                    "p2-area p3-area"
+                    "p1-area p1-area";
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto 1fr auto auto;
+                height: auto;
+                max-height: none;
+                overflow-y: auto;
+            }
+            .player-area { min-height: 200px; }
+            .ra-slot, .auction-slot { width: 40px; height: 40px; }
+            .ra-slot .tile, .auction-slot .tile { font-size: 1.8rem; }
+        }
+        
+        @media (max-width: 640px) {
+            #game-container {
+                grid-template-areas: "title" "main-board" "p1-area" "p2-area" "p3-area";
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+                gap: 0.5rem;
+                padding: 0.5rem;
+            }
+            .game-title { font-size: 1.8rem; }
+            .ra-slots { justify-content: center; }
+            .board-top { flex-direction: column; align-items: center; }
+            .sun-disc { width: 80px; height: 80px; font-size: 2rem; }
+            .draw-pile { width: 60px; height: 90px; }
+            .ra-slot, .auction-slot { width: 35px; height: 35px; }
+            .ra-slot .tile, .auction-slot .tile { font-size: 1.5rem; }
+            .player-area { padding: 0.5rem; }
+            .player-header h3, .player-header .score { font-size: 1rem; }
+            .sun-token { width: 25px; height: 25px; font-size: 0.8rem; }
+            .tile { width: 30px; height: 30px; font-size: 1.2rem; }
+            .action-button { padding: 0.8rem 1rem; font-size: 1rem; }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1 class="game-title">RA</h1>
+
+        <div class="player-area player-area-p2" id="player-area-1">
+             <!-- AI Player 2 -->
+        </div>
+
+        <div class="main-board" id="main-board">
+            <div class="board-top">
+                <div class="ra-track">
+                    <div class="ra-track-label">RA TRACK</div>
+                    <div class="ra-slots" id="ra-slots"></div>
+                </div>
+                <div class="draw-pile-area">
+                    <div id="sun-disc" class="sun-disc"></div>
+                    <div class="sun-disc-label">EPOCH <span id="epoch-counter">1</span></div>
+                </div>
+            </div>
+            <div class="board-bottom">
+                <div class="auction-track">
+                    <div class="auction-track-label">AUCTION TRACK</div>
+                    <div class="auction-slots" id="auction-slots"></div>
+                </div>
+                 <div class="draw-pile-area">
+                    <div class="draw-pile" id="draw-pile">RA <span id="draw-pile-count"></span></div>
+                    <button class="action-button" id="invoke-ra-btn">Invoke Ra!</button>
+                </div>
+            </div>
+             <div class="message-area" id="message-area">Welcome to Ra!</div>
+        </div>
+
+        <div class="player-area player-area-p3" id="player-area-2">
+            <!-- AI Player 3 -->
+        </div>
+
+        <div class="player-area player-area-p1" id="player-area-0">
+            <!-- Human Player -->
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bid-modal">
+        <div class="modal-content">
+            <h2 id="bid-modal-title">Place your Bid!</h2>
+            <p id="bid-modal-text">Select a Sun Token to bid for the tiles on the auction track.</p>
+            <div id="bid-options"></div>
+            <button class="action-button" id="pass-bid-btn">Pass</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="summary-modal">
+        <div class="modal-content" id="summary-modal-content">
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- TILE DEFINITIONS ---
+        const TILE_TYPES = {
+            PHARAOH: 'Pharaoh',
+            GOLD: 'Gold',
+            GOD: 'God',
+            MONUMENT: 'Monument',
+            CIVILIZATION: 'Civilization',
+            NILE: 'Nile',
+            FLOOD: 'Flood',
+            RA: 'Ra',
+            DISASTER_DROUGHT: 'Drought',
+            DISASTER_UNREST: 'Unrest',
+            DISASTER_FUNERAL: 'Funeral',
+            DISASTER_EARTHQUAKE: 'Earthquake'
+        };
+
+        const TILE_EMOJIS = {
+            [TILE_TYPES.PHARAOH]: '👑',
+            [TILE_TYPES.GOLD]: '💎',
+            [TILE_TYPES.GOD]: '✨',
+            [TILE_TYPES.MONUMENT]: '🗿',
+            [TILE_TYPES.CIVILIZATION]: '📜',
+            [TILE_TYPES.NILE]: '🌊',
+            [TILE_TYPES.FLOOD]: '💧',
+            [TILE_TYPES.RA]: '☀️',
+            [TILE_TYPES.DISASTER_DROUGHT]: '🏜️',
+            [TILE_TYPES.DISASTER_UNREST]: '😠',
+            [TILE_TYPES.DISASTER_FUNERAL]: '⚱️',
+            [TILE_TYPES.DISASTER_EARTHQUAKE]: '🌋'
+        };
+
+        const MONUMENT_TYPES = ['Pyramid', 'Sphinx', 'Obelisk', 'Temple', 'Statue', 'StepPyramid', 'Palace', 'Fortress'];
+        const CIV_TYPES = ['Art', 'Technology', 'Writing', 'Agriculture', 'Religion'];
+
+        class Tile {
+            constructor(type, value = null) {
+                this.type = type;
+                this.value = value;
+                this.emoji = TILE_EMOJIS[type];
+            }
+        }
+
+        class MonumentTile extends Tile {
+            constructor(monumentType) {
+                super(TILE_TYPES.MONUMENT, monumentType);
+            }
+        }
+
+        class CivilizationTile extends Tile {
+            constructor(civType) {
+                super(TILE_TYPES.CIVILIZATION, civType);
+            }
+        }
+
+        // --- GAME CLASSES ---
+
+        class Player {
+            constructor(id, name, isAI) {
+                this.id = id;
+                this.name = name;
+                this.isAI = isAI;
+                this.sunTokens = [];
+                this.tiles = [];
+                this.score = 5;
+                this.pharaohs = 0;
+                this.monuments = new Set();
+                this.civs = new Set();
+                this.niles = 0;
+                this.floods = 0;
+                this.bid = null;
+                this.hasPassed = false;
+            }
+
+            addTile(tile) {
+                this.tiles.push(tile);
+                if (tile.type === TILE_TYPES.PHARAOH) this.pharaohs++;
+                if (tile.type === TILE_TYPES.NILE) this.niles++;
+                if (tile.type === TILE_TYPES.FLOOD) this.floods++;
+                if (tile.type === TILE_TYPES.MONUMENT) this.monuments.add(tile.value);
+                if (tile.type === TILE_TYPES.CIVILIZATION) this.civs.add(tile.value);
+            }
+
+            discardTiles(typesToDiscard) {
+                const keptTiles = [];
+                const discardedTiles = [];
+                this.tiles.forEach(tile => {
+                    if (typesToDiscard.includes(tile.type)) {
+                        discardedTiles.push(tile);
+                    } else {
+                        keptTiles.push(tile);
+                    }
+                });
+                this.tiles = keptTiles;
+                // Reset counts based on kept tiles
+                this.pharaohs = this.tiles.filter(t => t.type === TILE_TYPES.PHARAOH).length;
+                this.niles = this.tiles.filter(t => t.type === TILE_TYPES.NILE).length;
+                this.floods = this.tiles.filter(t => t.type === TILE_TYPES.FLOOD).length;
+                this.civs.clear();
+                this.tiles.filter(t => t.type === TILE_TYPES.CIVILIZATION).forEach(t => this.civs.add(t.value));
+                return discardedTiles;
+            }
+        }
+
+        class GameState {
+            constructor(numPlayers) {
+                this.players = [];
+                for (let i = 0; i < numPlayers; i++) {
+                    this.players.push(new Player(i, i === 0 ? 'You' : `AI ${i}`, i !== 0));
+                }
+                this.epoch = 1;
+                this.drawPile = [];
+                this.auctionTrack = [];
+                this.raTrack = [];
+                this.currentPlayerIndex = 0;
+                this.sunTokensInCenter = [];
+                this.isAuctionPhase = false;
+                this.auctionBidders = [];
+                this.highestBidder = null;
+                this.currentSun = 1;
+            }
+
+            nextPlayer() {
+                this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+                return this.players[this.currentPlayerIndex];
+            }
+
+            getCurrentPlayer() {
+                return this.players[this.currentPlayerIndex];
+            }
+        }
+
+        class AuctionManager {
+            constructor(gameState, uiUpdater, gameController) {
+                this.gameState = gameState;
+                this.uiUpdater = uiUpdater;
+                this.gameController = gameController;
+            }
+
+            startAuction(invokerId) {
+                this.gameState.isAuctionPhase = true;
+                this.gameState.highestBidder = null;
+                this.gameState.players.forEach(p => { p.bid = null; p.hasPassed = false; });
+                
+                // Determine auction order starting from player after invoker
+                this.gameState.currentPlayerIndex = (invokerId + 1) % this.gameState.players.length;
+                this.gameState.auctionBidders = this.gameState.players.map((_, i) => this.gameState.players[(invokerId + 1 + i) % this.gameState.players.length]);
+                this.uiUpdater.updateMessage(`Auction started! Bidding starts with ${this.gameState.getCurrentPlayer().name}.`);
+                this.uiUpdater.renderAll();
+                setTimeout(() => this.processNextBidder(), 1000);
+            }
+
+            processNextBidder() {
+                const player = this.gameState.getCurrentPlayer();
+                const allBidsPlaced = this.gameState.auctionBidders.every(p => p.bid !== null || p.hasPassed);
+                
+                if (allBidsPlaced) {
+                    this.resolveAuction();
+                    return;
+                }
+
+                if (player.hasPassed || player.sunTokens.length === 0) {
+                     player.hasPassed = true;
+                     this.gameState.nextPlayer();
+                     this.processNextBidder();
+                     return;
+                }
+
+                this.uiUpdater.updateMessage(`${player.name}'s turn to bid.`);
+                if (player.isAI) {
+                    const bid = this.calculateAIBid(player);
+                    setTimeout(() => this.placeBid(player, bid), 1500);
+                } else {
+                    this.uiUpdater.showBidModal(player);
+                }
+            }
+
+            placeBid(player, bidValue) {
+                this.uiUpdater.hideBidModal();
+                if (bidValue === null) { // Pass
+                    player.hasPassed = true;
+                    this.uiUpdater.updateMessage(`${player.name} passes.`);
+                } else {
+                    player.bid = bidValue;
+                    this.uiUpdater.updateMessage(`${player.name} bids ${bidValue}.`);
+                }
+                
+                this.gameState.nextPlayer();
+                setTimeout(() => this.processNextBidder(), 1000);
+            }
+
+            calculateAIBid(player) {
+                let trackValue = 0;
+                // Simple heuristic: count useful tiles
+                this.gameState.auctionTrack.forEach(tile => {
+                    if ([TILE_TYPES.GOLD, TILE_TYPES.PHARAOH, TILE_TYPES.NILE, TILE_TYPES.FLOOD, TILE_TYPES.GOD].includes(tile.type)) {
+                        trackValue += 2;
+                    }
+                    if (tile.type === TILE_TYPES.CIVILIZATION && !player.civs.has(tile.value)) {
+                        trackValue += (1 + player.civs.size);
+                    }
+                    if (tile.type === TILE_TYPES.MONUMENT && !player.monuments.has(tile.value)) {
+                        trackValue += (1 + player.monuments.size);
+                    }
+                    if (tile.type.startsWith('Disaster')) {
+                        trackValue -= 5;
+                    }
+                });
+
+                if (trackValue < 2) return null; // Pass on low value lots
+
+                // Find a suitable sun token to bid
+                const availableSuns = player.sunTokens.slice().sort((a, b) => a - b);
+                for (let sun of availableSuns) {
+                    if (sun > trackValue / 2) {
+                        // Check if it can beat existing highest bid
+                        const highestBid = Math.max(0, ...this.gameState.players.map(p => p.bid || 0));
+                        if(sun > highestBid) return sun;
+                    }
+                }
+                
+                // If no good bid found, bid the lowest possible if track is valuable enough.
+                const highestBid = Math.max(0, ...this.gameState.players.map(p => p.bid || 0));
+                const potentialBids = availableSuns.filter(s => s > highestBid);
+                if (trackValue > 5 && potentialBids.length > 0) {
+                   return potentialBids[0];
+                }
+
+                return null; // Pass
+            }
+
+            resolveAuction() {
+                const bidders = this.gameState.players.filter(p => p.bid !== null);
+                
+                if (bidders.length === 0) {
+                    this.uiUpdater.updateMessage("All players passed. Tiles are discarded.");
+                    this.gameState.auctionTrack = []; // Discard tiles
+                } else {
+                    bidders.sort((a, b) => b.bid - a.bid);
+                    const winner = bidders[0];
+                    this.uiUpdater.updateMessage(`${winner.name} wins the auction with a bid of ${winner.bid}!`);
+                    
+                    // Exchange sun tokens
+                    const winningBidToken = winner.bid;
+                    const sunTokenIndex = winner.sunTokens.indexOf(winningBidToken);
+                    winner.sunTokens.splice(sunTokenIndex, 1);
+                    
+                    const oldCenterToken = this.gameState.currentSun;
+                    this.gameState.sunTokensInCenter.push(winningBidToken);
+                    
+                    this.gameState.currentSun = this.gameState.sunTokensInCenter.shift();
+                    winner.sunTokens.push(oldCenterToken);
+                    winner.sunTokens.sort((a,b)=>a-b);
+
+                    // Award tiles
+                    const disasters = [];
+                    this.gameState.auctionTrack.forEach(tile => {
+                        if (tile.type.startsWith('Disaster')) {
+                            disasters.push(tile);
+                        } else {
+                            winner.addTile(tile);
+                        }
+                    });
+                    this.gameState.auctionTrack = [];
+
+                    if (disasters.length > 0) {
+                        this.gameController.handleDisasters(winner, disasters);
+                    }
+                }
+                
+                this.gameState.isAuctionPhase = false;
+                // Set next player to the winner
+                this.gameState.currentPlayerIndex = this.gameState.players.findIndex(p => p.id === bidders[0]?.id ?? this.gameState.currentPlayerIndex);
+                this.uiUpdater.renderAll();
+                setTimeout(() => this.gameController.startNextTurn(), 2000);
+            }
+        }
+
+        class UIUpdater {
+            constructor(gameState) {
+                this.gameState = gameState;
+                this.playerAreas = [
+                    document.getElementById('player-area-0'),
+                    document.getElementById('player-area-1'),
+                    document.getElementById('player-area-2'),
+                ];
+                this.raSlotsEl = document.getElementById('ra-slots');
+                this.auctionSlotsEl = document.getElementById('auction-slots');
+                this.sunDiscEl = document.getElementById('sun-disc');
+                this.epochCounterEl = document.getElementById('epoch-counter');
+                this.drawPileCountEl = document.getElementById('draw-pile-count');
+                this.messageAreaEl = document.getElementById('message-area');
+                this.drawPileEl = document.getElementById('draw-pile');
+                this.invokeRaBtn = document.getElementById('invoke-ra-btn');
+                this.bidModal = document.getElementById('bid-modal');
+                this.summaryModal = document.getElementById('summary-modal');
+            }
+
+            renderAll() {
+                this.gameState.players.forEach(player => this.renderPlayer(player));
+                this.renderBoard();
+                this.updateControls();
+            }
+
+            renderPlayer(player) {
+                const area = this.playerAreas[player.id];
+                area.innerHTML = `
+                    <div class="player-header">
+                        <h3>${player.name} ${player.isAI ? '(AI)' : ''}</h3>
+                        <span class="score">${player.score} pts</span>
+                    </div>
+                    <div class="player-suns">
+                        ${player.sunTokens.map(s => `<div class="sun-token">${s}</div>`).join('')}
+                    </div>
+                    <div class="player-tiles">
+                        ${player.tiles.map(t => `<div class="tile" title="${t.type}: ${t.value || ''}">${t.emoji}</div>`).join('')}
+                    </div>
+                `;
+                 // Highlight current player
+                this.playerAreas.forEach(a => a.classList.remove('current-player'));
+                if (!this.gameState.isAuctionPhase) {
+                    this.playerAreas[this.gameState.currentPlayerIndex].classList.add('current-player');
+                } else {
+                     this.playerAreas.find(pa => pa.id === `player-area-${this.gameState.getCurrentPlayer().id}`).classList.add('current-player');
+                }
+            }
+
+            renderBoard() {
+                this.raSlotsEl.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'ra-slot';
+                    if (this.gameState.raTrack[i]) {
+                        slot.innerHTML = `<div class="tile">${this.gameState.raTrack[i].emoji}</div>`;
+                    }
+                    this.raSlotsEl.appendChild(slot);
+                }
+
+                this.auctionSlotsEl.innerHTML = '';
+                 for (let i = 0; i < 8; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'auction-slot';
+                    if (this.gameState.auctionTrack[i]) {
+                        slot.innerHTML = `<div class="tile">${this.gameState.auctionTrack[i].emoji}</div>`;
+                    }
+                    this.auctionSlotsEl.appendChild(slot);
+                }
+
+                this.sunDiscEl.textContent = this.gameState.currentSun;
+                this.epochCounterEl.textContent = this.gameState.epoch;
+                this.drawPileCountEl.textContent = this.gameState.drawPile.length;
+            }
+            
+            updateMessage(message) {
+                this.messageAreaEl.textContent = message;
+            }
+            
+            updateControls() {
+                const currentPlayer = this.gameState.getCurrentPlayer();
+                const canHumanAct = !currentPlayer.isAI && !this.gameState.isAuctionPhase;
+                this.drawPileEl.classList.toggle('disabled', !canHumanAct);
+                this.invokeRaBtn.disabled = !canHumanAct;
+            }
+
+            showBidModal(player) {
+                const bidOptionsEl = document.getElementById('bid-options');
+                bidOptionsEl.innerHTML = player.sunTokens.map(s => `<div class="sun-token bid-option" data-value="${s}">${s}</div>`).join('');
+                this.bidModal.classList.add('visible');
+            }
+
+            hideBidModal() {
+                this.bidModal.classList.remove('visible');
+            }
+            
+            showSummaryModal(title, content) {
+                this.summaryModal.querySelector('#summary-modal-content').innerHTML = `<h2>${title}</h2><div>${content}</div>`;
+                this.summaryModal.classList.add('visible');
+            }
+            
+            hideSummaryModal() {
+                this.summaryModal.classList.remove('visible');
+            }
+        }
+
+        class GameController {
+            constructor() {
+                this.gameState = new GameState(3);
+                this.uiUpdater = new UIUpdater(this.gameState);
+                this.auctionManager = new AuctionManager(this.gameState, this.uiUpdater, this);
+                this.setupEventListeners();
+            }
+
+            initGame() {
+                this.createDrawPile();
+                this.assignSunTokens();
+                this.gameState.currentSun = 1; // Start with sun 1 in the middle.
+                this.uiUpdater.renderAll();
+                this.startNextTurn();
+            }
+            
+            createDrawPile() {
+                let pile = [];
+                // Simplified tile distribution for playability
+                for(let i=0; i<30; i++) pile.push(new Tile(TILE_TYPES.RA));
+                for(let i=0; i<8; i++) pile.push(new Tile(TILE_TYPES.PHARAOH));
+                for(let i=0; i<5; i++) pile.push(new Tile(TILE_TYPES.GOLD));
+                for(let i=0; i<5; i++) pile.push(new Tile(TILE_TYPES.GOD));
+                for(let i=0; i<25; i++) pile.push(new CivilizationTile(CIV_TYPES[i % CIV_TYPES.length]));
+                for(let i=0; i<25; i++) pile.push(new MonumentTile(MONUMENT_TYPES[i % MONUMENT_TYPES.length]));
+                for(let i=0; i<12; i++) pile.push(new Tile(TILE_TYPES.NILE));
+                for(let i=0; i<4; i++) pile.push(new Tile(TILE_TYPES.FLOOD));
+                for(let i=0; i<2; i++) pile.push(new Tile(TILE_TYPES.DISASTER_DROUGHT));
+                for(let i=0; i<2; i++) pile.push(new Tile(TILE_TYPES.DISASTER_UNREST));
+                for(let i=0; i<2; i++) pile.push(new Tile(TILE_TYPES.DISASTER_FUNERAL));
+                for(let i=0; i<2; i++) pile.push(new Tile(TILE_TYPES.DISASTER_EARTHQUAKE));
+                
+                // Shuffle
+                for (let i = pile.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pile[i], pile[j]] = [pile[j], pile[i]];
+                }
+                this.gameState.drawPile = pile;
+            }
+            
+            assignSunTokens() {
+                const allSuns = [2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
+                this.gameState.players.forEach(p => p.sunTokens = []);
+                this.gameState.players[0].sunTokens = [2,5,9,13];
+                this.gameState.players[1].sunTokens = [3,6,10,14];
+                this.gameState.players[2].sunTokens = [4,7,11,15];
+                this.gameState.sunTokensInCenter = [8,12,16];
+            }
+            
+            setupEventListeners() {
+                document.getElementById('draw-pile').addEventListener('click', () => {
+                    if(!this.gameState.getCurrentPlayer().isAI && !this.gameState.isAuctionPhase) this.drawTile();
+                });
+                document.getElementById('invoke-ra-btn').addEventListener('click', () => {
+                     if(!this.gameState.getCurrentPlayer().isAI && !this.gameState.isAuctionPhase) this.invokeRa();
+                });
+                document.getElementById('bid-modal').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('bid-option')) {
+                        const bidValue = parseInt(e.target.dataset.value);
+                        this.auctionManager.placeBid(this.gameState.getCurrentPlayer(), bidValue);
+                    }
+                    if (e.target.id === 'pass-bid-btn') {
+                        this.auctionManager.placeBid(this.gameState.getCurrentPlayer(), null);
+                    }
+                });
+            }
+            
+            startNextTurn() {
+                if (this.checkForEpochEnd()) return;
+                
+                const player = this.gameState.getCurrentPlayer();
+                this.uiUpdater.updateMessage(`It's ${player.name}'s turn.`);
+                this.uiUpdater.renderAll();
+
+                if (player.isAI) {
+                    this.uiUpdater.updateControls(); // Disable buttons
+                    setTimeout(() => this.runAITurn(player), 2000);
+                } else {
+                    this.uiUpdater.updateControls(); // Enable buttons
+                }
+            }
+            
+            runAITurn(player) {
+                 // Simple AI: if auction track has > 3 good tiles, invoke Ra. Otherwise, draw.
+                const goodTiles = this.gameState.auctionTrack.filter(t => !t.type.startsWith('Disaster')).length;
+                if (this.gameState.auctionTrack.length > 3 && goodTiles > 2 && this.gameState.raTrack.length < 8) {
+                    this.invokeRa();
+                } else {
+                    this.drawTile();
+                }
+            }
+
+            drawTile() {
+                if (this.gameState.drawPile.length === 0) {
+                    this.uiUpdater.updateMessage("Draw pile is empty!");
+                    return;
+                }
+                const tile = this.gameState.drawPile.pop();
+                this.uiUpdater.updateMessage(`${this.gameState.getCurrentPlayer().name} drew a ${tile.type} tile.`);
+                
+                if (tile.type === TILE_TYPES.RA) {
+                    this.gameState.raTrack.push(tile);
+                    this.uiUpdater.renderBoard();
+                    if (this.checkForEpochEnd()) return;
+                    this.auctionManager.startAuction(this.gameState.getCurrentPlayer().id);
+                } else {
+                    this.gameState.auctionTrack.push(tile);
+                    this.uiUpdater.renderBoard();
+                    if (this.gameState.auctionTrack.length >= 8) {
+                       this.auctionManager.startAuction(this.gameState.getCurrentPlayer().id);
+                    } else {
+                        this.gameState.nextPlayer();
+                        setTimeout(() => this.startNextTurn(), 1000);
+                    }
+                }
+            }
+            
+            invokeRa() {
+                this.uiUpdater.updateMessage(`${this.gameState.getCurrentPlayer().name} invokes Ra!`);
+                this.auctionManager.startAuction(this.gameState.getCurrentPlayer().id);
+            }
+
+            handleDisasters(player, disasters) {
+                // Simplified disaster handling
+                this.uiUpdater.updateMessage(`${player.name} is hit by disasters!`);
+                disasters.forEach(disaster => {
+                    switch (disaster.type) {
+                        case TILE_TYPES.DISASTER_DROUGHT: // Discard Nile/Flood
+                            player.discardTiles([TILE_TYPES.NILE, TILE_TYPES.FLOOD]);
+                            break;
+                        case TILE_TYPES.DISASTER_UNREST: // Discard Civs
+                            player.discardTiles([TILE_TYPES.CIVILIZATION]);
+                            break;
+                        case TILE_TYPES.DISASTER_FUNERAL: // Discard Pharaohs
+                            player.discardTiles([TILE_TYPES.PHARAOH]);
+                            break;
+                        case TILE_TYPES.DISASTER_EARTHQUAKE: // Discard Monuments
+                             player.discardTiles([TILE_TYPES.MONUMENT]);
+                             player.monuments.clear();
+                             break;
+                    }
+                });
+            }
+
+            checkForEpochEnd() {
+                if (this.gameState.raTrack.length >= 9) {
+                    this.endEpoch("Ra track is full!");
+                    return true;
+                }
+                const allSunsUsed = this.gameState.players.every(p => p.sunTokens.length === 0);
+                if(allSunsUsed) {
+                    this.endEpoch("All sun tokens have been used!");
+                    return true;
+                }
+                return false;
+            }
+            
+            endEpoch(reason) {
+                this.uiUpdater.updateMessage(`Epoch ${this.gameState.epoch} ends: ${reason}`);
+                this.calculateEpochScores();
+                
+                let summaryContent = this.generateEpochSummary();
+                if (this.gameState.epoch >= 3) {
+                    this.calculateFinalScores();
+                    summaryContent += this.generateFinalSummary();
+                    this.uiUpdater.showSummaryModal(`Game Over!`, summaryContent);
+                    // Game ends, no more actions.
+                } else {
+                    this.uiUpdater.showSummaryModal(`Epoch ${this.gameState.epoch} Score Summary`, summaryContent);
+                    setTimeout(() => {
+                        this.uiUpdater.hideSummaryModal();
+                        this.setupNextEpoch();
+                    }, 5000);
+                }
+            }
+            
+            calculateEpochScores() {
+                // Pharaohs
+                const pharaohCounts = this.gameState.players.map(p => p.pharaohs);
+                const maxPharaohs = Math.max(...pharaohCounts);
+                const minPharaohs = Math.min(...pharaohCounts);
+                this.gameState.players.forEach(p => {
+                    if (p.pharaohs === maxPharaohs && maxPharaohs > 0) p.score += 5;
+                    if (p.pharaohs === minPharaohs) p.score -= 2;
+                });
+                
+                // Gold
+                this.gameState.players.forEach(p => {
+                    if (p.tiles.some(t => t.type === TILE_TYPES.GOLD)) p.score += 3;
+                });
+                
+                // Civs
+                this.gameState.players.forEach(p => {
+                    if (p.civs.size >= 3) p.score += 5;
+                    if (p.civs.size >= 4) p.score += 5; // 10 total
+                    if (p.civs.size >= 5) p.score += 5; // 15 total
+                });
+
+                // Nile & Floods
+                this.gameState.players.forEach(p => {
+                    if (p.niles > 0 && p.floods > 0) p.score += (p.niles + p.floods);
+                });
+            }
+
+            calculateFinalScores() {
+                 // Monuments
+                this.gameState.players.forEach(p => {
+                    const uniqueMonuments = p.monuments.size;
+                    if (uniqueMonuments === 3) p.score += 5;
+                    if (uniqueMonuments === 4) p.score += 5; // 10
+                    if (uniqueMonuments === 5) p.score += 5; // 15
+                    if (uniqueMonuments === 6) p.score += 5; // 20
+                    if (uniqueMonuments === 7) p.score += 5; // 25
+                    if (uniqueMonuments === 8) p.score += 10; // 35 total
+                    // Also 1 point per monument of the same type (simplified: just score for unique)
+                });
+                
+                // Sun Tokens
+                const sunValues = this.gameState.players.map(p => Math.max(0, ...p.sunTokens));
+                const maxSun = Math.max(...sunValues);
+                this.gameState.players.forEach((p, i) => {
+                    if (sunValues[i] === maxSun) p.score += 5;
+                });
+            }
+            
+            generateEpochSummary() {
+                 let table = `<table><tr><th>Player</th><th>Score</th></tr>`;
+                 this.gameState.players.forEach(p => {
+                     table += `<tr><td>${p.name}</td><td>${p.score}</td></tr>`;
+                 });
+                 table += `</table><p>Preparing for next epoch...</p>`;
+                 return table;
+            }
+
+            generateFinalSummary() {
+                const winner = this.gameState.players.sort((a,b) => b.score - a.score)[0];
+                return `<hr><h3>Final Winner: ${winner.name} with ${winner.score} points!</h3>`;
+            }
+
+            setupNextEpoch() {
+                this.gameState.epoch++;
+                this.gameState.auctionTrack = [];
+                this.gameState.raTrack = [];
+                
+                // Players discard most tiles
+                this.gameState.players.forEach(p => {
+                    p.discardTiles([
+                        TILE_TYPES.PHARAOH, TILE_TYPES.GOLD, TILE_TYPES.CIVILIZATION,
+                        TILE_TYPES.NILE, TILE_TYPES.FLOOD
+                    ]);
+                });
+                
+                // Reset bidding state
+                this.gameState.isAuctionPhase = false;
+                
+                this.uiUpdater.renderAll();
+                this.startNextTurn();
+            }
+        }
+
+        const game = new GameController();
+        game.initGame();
+    });
+    </script>
+</body>
+</html>
